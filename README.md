@@ -15,7 +15,7 @@
 
 目前通过**开发者模式**加载安装：
 
-1. 下载本项目源码：点仓库右上角绿色 **Code** 按钮 → **Download ZIP**，解压到本地
+1. 下载安装包 **`xiaoshuo-reader-v1.0.0.zip`**：进入仓库右侧 **Releases** → 最新版 **v1.0.0** → 下载 `xiaoshuo-reader-v1.0.0.zip`，解压到本地
 2. 打开 Chrome / Edge 浏览器，进入扩展管理页：
    - Chrome：地址栏输入 `chrome://extensions/`
    - Edge：地址栏输入 `edge://extensions/`

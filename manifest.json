@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "小说阅读助手",
+  "version": "3.3",
+  "description": "小说阅读助手：统一阅读样式，提供纯净，舒适的小说阅读体验。",
+  "minimum_chrome_version": "88",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "小说阅读助手",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "*://*/List.htm",
+        "*://*/List.html",
+        "*://*/List.shtml",
+        "*://*/index.htm",
+        "*://*/index.html",
+        "*://*/index.shtml",
+        "*://*/Default.htm",
+        "*://*/Default.html",
+        "*://*/Default.shtml"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ]
+}

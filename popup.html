@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>小说阅读助手</title>
+  <style>
+    :root {
+      --text: #1c1c1e;
+      --sub: #8e8e93;
+      --accent: #007aff;
+      --red: #ff3b30;
+      --sep: rgba(60, 60, 67, .14);
+      --hover: rgba(0, 0, 0, .06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 230px;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: rgba(246, 246, 248, 1);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+      overflow: hidden;
+    }
+    .head {
+      padding: 10px 14px 6px;
+    }
+    .head .title { font-size: 13px; font-weight: 600; }
+    .head .site {
+      margin-top: 2px;
+      font-size: 11px;
+      color: var(--sub);
+      word-break: break-all;
+    }
+    .menu { padding: 4px 6px 6px; }
+    .item {
+      display: flex; align-items: center; gap: 9px;
+      width: 100%; padding: 7px 10px;
+      border: 0; border-radius: 8px; background: transparent;
+      font: inherit; color: var(--text); cursor: pointer; text-align: left;
+    }
+    .item:hover { background: var(--hover); }
+    .item svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .item.enable svg { color: var(--accent); }
+    .item.disable svg { color: var(--red); }
+    .item.disable { color: var(--red); font-weight: 600; }
+    .sep { height: 1px; background: var(--sep); margin: 5px 10px; }
+  </style>
+</head>
+<body>
+  <div class="head">
+    <div class="title">小说阅读助手</div>
+    <div class="site" id="site"></div>
+  </div>
+  <div class="menu">
+    <button type="button" class="item enable" id="btn-enable">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      <span>在此网站启用阅读器</span>
+    </button>
+    <button type="button" class="item disable" id="btn-disable" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9.5"/>
+        <path d="m5.5 5.5 13 13"/>
+      </svg>
+      <span>退出阅读器</span>
+    </button>
+    <div class="sep"></div>
+    <button type="button" class="item" id="btn-settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3.2"/>
+        <path d="M12 2.6v2.4M12 19v2.4M2.6 12H5M19 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/>
+      </svg>
+      <span>设置</span>
+    </button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

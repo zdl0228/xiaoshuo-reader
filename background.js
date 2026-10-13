@@ -1,0 +1,84 @@
+/* =============================================================
+ * background.js — 小说阅读助手 扩展版后台服务（Manifest V3）
+ *  1. 跨域请求转发：content script 受 CORS 限制，经此 fetch 任意小说站
+ *  2. 打开新标签：GM_openInTab 等价
+ *  注：扩展图标点击由 action.default_popup（popup.html/popup.js）独立处理，
+ *      有 popup 时 chrome.action.onClicked 不再触发，故此处不处理图标点击。
+ * ============================================================= */
+
+// ---- 跨域 fetch 转发 ----
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (!request || typeof request.action !== 'string') return;
+
+  if (request.action === 'mnr_fetch') {
+    var url = request.url;
+    // 安全：只转发 http/https 请求。拒绝 file://、chrome://、data: 等协议，
+    // 防止被劫持的 content script 用它读取本地文件或扩展内部资源（Chromium 官方建议）
+    try {
+      var _u = new URL(url);
+      if (!/^https?:$/.test(_u.protocol)) {
+        sendResponse({ ok: false, status: 0, error: '拒绝非 http(s) 请求' });
+        return false;
+      }
+    } catch (e) {
+      sendResponse({ ok: false, status: 0, error: 'URL 无效' });
+      return false;
+    }
+    var method = request.method || 'GET';
+    var headers = request.headers || {};
+    var timeout = request.timeout || 15000;
+
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, timeout);
+
+    var opts = {
+      method: method,
+      redirect: 'follow',
+      credentials: 'include',
+      signal: controller.signal
+    };
+    if (method === 'POST' && request.body) {
+      opts.body = request.body;
+      if (!headers['Content-Type']) headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+    }
+
+    fetch(url, opts)
+      .then(function (resp) {
+        var status = resp.status;
+        var finalUrl = resp.url;
+        return resp.text().then(function (body) {
+          return { status: status, finalUrl: finalUrl, body: body };
+        });
+      })
+      .then(function (data) {
+        clearTimeout(timer);
+        sendResponse({ ok: true, status: data.status, finalUrl: data.finalUrl, body: data.body });
+      })
+      .catch(function (err) {
+        clearTimeout(timer);
+        var msg = (err && err.name === 'AbortError') ? '请求超时' : (err && err.message || String(err));
+        sendResponse({ ok: false, status: 0, error: msg });
+      });
+    return true; // 保持异步通道
+  }
+
+  if (request.action === 'mnr_open_tab') {
+    chrome.tabs.create({ url: request.url, active: !!request.active });
+    sendResponse({ ok: true });
+    return false;
+  }
+
+  if (request.action === 'mnr_open_preferences') {
+    // 通知当前标签的 content script 打开设置面板
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      if (tabs && tabs[0] && tabs[0].id != null) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'mnr_open_preferences' }, function () {
+          // 无响应忽略（content script 可能未注入）
+          void chrome.runtime.lastError;
+        });
+      }
+    });
+    sendResponse({ ok: true });
+    return false;
+  }
+});

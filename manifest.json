@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "小说阅读助手",
-  "version": "1.0.0",
+  "version": "1.0",
   "description": "小说阅读助手：统一阅读样式，提供纯净，舒适的小说阅读体验。",
   "minimum_chrome_version": "88",
   "icons": {

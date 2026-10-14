@@ -131,7 +131,7 @@
   var GM_info = {
     script: {
       name: '小说阅读助手',
-      version: '3.3',
+      version: '1.0',
       description: '小说阅读助手：统一阅读样式、去广告、段落整理、自动翻页、进度记忆、快捷键',
       includes: ['*://*/*'],
       excludes: []
@@ -1193,7 +1193,7 @@
       // 删除隐藏元素（起点隐藏段评数字/弹幕等用 display:none，CSS 被移除后隐藏失效）
       $div.find('[style*="display:none"], [style*="display: none"], [hidden], [aria-hidden="true"]').remove();
       // 删除章节标题
-      $div.find('h1, h2, h3').remove();
+      $div.find('h1, h2, h3, h4, h5, h6, [role="heading"]').remove();
       // contentRemove
       $div.find(Rule.contentRemove).remove();
       if (info && info.contentRemove) {
@@ -1204,7 +1204,7 @@
           var $t = $(this);
           var txt = ($t.text() || '').replace(/\s+/g, '');
           if (!txt) return;
-          if (/^(?:本章说\d{0,6}|(?:\S+·)?(?:作者|作家)说|上起点中文网支持我[^\n]*|下载App|下载APP|下载客户端|打开App|立即下载|打赏(?:了)?\d{0,8}(?:万|千)?(?:起点)?(?:点|币)?|打赏榜|打赏列表|最近打赏|本章打赏|打赏记录|扫一扫，手机接着读|上一章|下一章|目录|章节目录|章节列表|回目录|添加书签|\d{1,8}字|\d{1,5})$/.test(txt)) {
+          if (/^(?:本章说\d{0,6}|(?:\S+·)?(?:作者|作家)说|上起点中文网支持我[^\n]*|下载App|下载APP|下载客户端|打开App|立即下载|打赏(?:了)?\d{0,8}(?:万|千)?(?:起点)?(?:点|币)?|打赏榜|打赏列表|最近打赏|本章打赏|打赏记录|扫一扫，手机接着读|上一章|下一章|目录|章节目录|章节列表|回目录|添加书签|\d{1,8}字|\d{1,5}|讨论热烈[^\n]{0,30}段评|阅文集团|本作品由起点中文网进行电子制作与发行|@版权所有侵权必究|与[0-9.]+万?位书友[^\n]{0,40}|「盟主」[^\n]{0,30}(?:「堂主」[^\n]{0,30})?|第[0-9一二三四五六七八九十百千]+章[^\n]{0,40}|类型|上架|连载中\(字\)|都市|[^\n]*◎著|反馈|指南|举报|旧版|著|\d{1,6}(?:\.\d{1,2})?万)$/.test(txt)) {
               $t.remove();
           }
       });
@@ -3094,6 +3094,7 @@ preferencesShow: function(event){
         this.show();
       }
 
+      this._curUrl = url;
       const src = url + '#mynovelreader';
 
       if (this.iframe.src === src) {
@@ -3113,6 +3114,15 @@ preferencesShow: function(event){
       this.win = this.iframe.contentWindow;
 
       if (!this.doc) {
+        // [修复] iframe 加载偶发失败（contentDocument 为空，多为网站临时拦截/网络抖动）：重建 iframe 自动重试一次，再判 Fail
+        this._loadFail = (this._loadFail || 0) + 1;
+        if (this._loadFail <= 1 && this._curUrl) {
+          this.hide();
+          if (this.iframe) { this.iframe.remove(); this.iframe = null; }
+          this.status = RequestStatus.Idle;
+          this.send(this._curUrl);
+          return;
+        }
         this.status = RequestStatus.Fail;
         this.hide();
         this.errorHandle();
@@ -3149,6 +3159,7 @@ preferencesShow: function(event){
         }
       }
       if (myToken !== this._loadToken) return;
+      this._loadFail = 0;
       this.hide();
       this.status = RequestStatus.Finish;
       this.finishHandle();
@@ -3338,6 +3349,7 @@ preferencesShow: function(event){
               {
                   url: /^https?:\/\/([a-z0-9-]+\.)*weimangguo\.com\//i,
                   name: "微妙看书",
+                  useiframe: true,   // 后台 fetch 翻页请求疑似被站点防护拦截（连续翻几章后失效），改用同源 iframe 导航加载下一页，更接近真实浏览
                   contentSelector: "#nr_content, .nr_content, #nr, .nr_nr, #chaptercontent, #booktxt, #htmlContent, .txtnav, #pagecontent, #content, .content",
                   nextSelector: "a:contains('下一页'), a:contains('下一章'), a:contains('下页'), a:contains('下章'), a[rel='next']"
               }
@@ -4042,7 +4054,8 @@ preferencesShow: function(event){
           App$1.lastRequestUrl = App$1.requestUrl;
 
           if (nextUrl && !App$1.isTheEnd && !(nextUrl in App$1.parsedPages)) {
-              App$1.curPageUrl = App$1.requestUrl;
+              try {
+                  App$1.curPageUrl = App$1.requestUrl;
               App$1.requestUrl = null;
 
               var useiframe = App$1.site.useiframe;
@@ -4065,6 +4078,13 @@ preferencesShow: function(event){
                   App$1.request.send(nextUrl, referer);
               } else {
                   App$1.request.send(nextUrl);
+              }
+              } catch (e) {
+                  // [修复] 请求体抛异常时也必须释放 isRequesting 锁，否则锁永久卡死，
+                  // 导致后续翻页（含手动下一页）全部失效，只能退出阅读模式重进才能恢复。
+                  C.error('翻页请求异常', e);
+                  logStore('error', '翻页请求异常（' + nextUrl + '）：' + ((e && e.message) || e));
+                  App$1.$loading.html("<a href='" + nextUrl + "'>翻页请求异常，请点此手动打开</a>").show();
               }
       
           }

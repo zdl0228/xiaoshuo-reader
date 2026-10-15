@@ -131,7 +131,6 @@
   var GM_info = {
     script: {
       name: '小说阅读助手',
-      version: '1.0',
       description: '小说阅读助手：统一阅读样式、去广告、段落整理、自动翻页、进度记忆、快捷键',
       includes: ['*://*/*'],
       excludes: []
@@ -588,7 +587,8 @@
       },
 
       get preloadNextPage() {
-          return GM_getValue('preloadNextPage', false);
+          // 预加载默认开启：滚动接近底部(400px)即预读下一页，翻页基本无等待（参考 Super-preloader 默认预读）
+          return GM_getValue('preloadNextPage', true);
       },
       set preloadNextPage(bool) {
           GM_setValue('preloadNextPage', bool);
@@ -1720,6 +1720,7 @@
           var url = '',
               selector = this.info.nextSelector || this.info.nextUrl,
               noSection = this.info.noSection;
+          this.nextFromReal = false;   // 是否命中页面真实「下一页」元素（用于翻页节流自适应）
 
           if (selector === false) {
               this.nextUrl = url;
@@ -1763,6 +1764,26 @@
               url = this.checkLinks(urlElement);
           }
 
+          // [优化] 真实「下一页」按钮识别增强：a 链接之外，再匹配 button/常见分页 class 等，
+          // 命中即取真实跳转目标（href 或 data-url/closest a），避免落到智能拼 URL（慢且易踩空）。
+          if (!url) {
+              var extraSel = "button:contains('下一页'),button:contains('下一章'),button:contains('下一頁'),"
+                  + "button:contains('下页'),button:contains('下章'),"
+                  + "a.next,a.next-page,a.page-next,a[data-next],a[data-url],a[data-href],a[data-link],"
+                  + "#next,#nextPage,#next_page,.next-page,.next_page,.pager-next,.page-next,.page_next,.next-btn,.btn-next,"
+                  + "input[type='button'][value*='下一页'],input[type='button'][value*='下一章'],"
+                  + "div[data-next],span[data-next],div[data-url],span[data-url]";
+              var $extra = this.$doc.find(extraSel);
+              for (var ei = 0; ei < $extra.length && !url; ei++) {
+                  var $el = $extra.eq(ei);
+                  if (!$el.is(':visible')) continue;
+                  var h = $el.attr('href') || $el.attr('data-url') || $el.attr('data-href')
+                      || $el.attr('data-link') || $el.attr('data-next');
+                  if (!h && $el.closest('a').length) h = $el.closest('a').attr('href');
+                  if (h && h !== location.href) { urlElement = $el; url = h; }
+              }
+          }
+
           if (!noSection && url && urlElement && typeof urlElement !== 'string') {
               // 一般第一页下一章按钮文本含页就是多页章节
               // 判断是否分页章节在获取上一页链接函数中处理
@@ -1772,6 +1793,9 @@
                   isSectionUrl = true;
               }
           }
+
+          // [优化] 记录是否命中页面真实「下一页」元素；命中则翻页节流缩短、更跟手
+          if (url && urlElement && urlElement.length) this.nextFromReal = true;
 
           if (!url && Setting.smartNextPage) { url = this.guessNextUrl(); }
 
@@ -4049,6 +4073,23 @@ preferencesShow: function(event){
           }
           App$1.isRequesting = true;
 
+          // [兜底] 翻页请求可能被站点防护/网络挂起（onload 迟迟不来），若 3 秒仍未完成，
+          // 清除「正在载入」提示、释放请求锁、重新解析下一页以恢复翻页链，避免永久卡在载入。
+          clearTimeout(App$1._reqTimer);
+          App$1._requestActive = true;
+          App$1._reqTimer = setTimeout(function() {
+              if (!App$1._requestActive) return;
+              App$1._requestActive = false;
+              App$1.isRequesting = false;
+              App$1.$loading.hide().html("");
+              try {
+                  var p = new Parser(App$1.site, document, App$1.curPageUrl);
+                  App$1.requestUrl = p.nextUrl;
+                  App$1.isTheEnd = p.isTheEnd;
+              } catch (e) { App$1.requestUrl = null; }
+              logStore('warn', '翻页请求超时(3s)，已重置，可继续翻页');
+          }, 3000);
+
           var nextUrl = App$1.requestUrl;
           const referer = App$1.lastRequestUrl || App$1.curPageUrl;
           App$1.lastRequestUrl = App$1.requestUrl;
@@ -4063,7 +4104,7 @@ preferencesShow: function(event){
               App$1.$loading
                   .show()
                   .html("")
-                  .append($("<img>").attr("src", "data:image/gif;base64,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"))
+                  .append('<svg width="18" height="18" viewBox="0 0 18 18" style="vertical-align:-4px;margin-right:6px"><circle cx="9" cy="9" r="7" fill="none" stroke="rgba(120,120,120,0.20)" stroke-width="2"/><circle cx="9" cy="9" r="7" fill="none" stroke="rgba(120,120,120,0.85)" stroke-width="2" stroke-linecap="round" stroke-dasharray="30 44" stroke-dashoffset="0"><animateTransform attributeName="transform" type="rotate" from="0 9 9" to="360 9 9" dur="0.9s" repeatCount="indefinite"/></circle></svg>')
                   .append("<a href='" + nextUrl + "' tabindex='-1'>正在载入下一页" + (useiframe ? "(iframe)" : "") + "...</a>");
 
               await sleep(App$1.site.nDelay || 0);
@@ -4089,10 +4130,11 @@ preferencesShow: function(event){
       
           }
 
-          // 延迟释放锁：保证相邻两次请求有最小间隔（1500ms，降低连续预加载触发站点风控的概率）
+          // 延迟释放锁：命中真实「下一页」按钮时缩短间隔（450ms，翻页更跟手）；
+          // 只能智能拼 URL 时保持长间隔（1500ms，降低连续预加载触发站点风控的概率）
           setTimeout(function() {
               App$1.isRequesting = false;
-          }, App$1.site.nDelay || 1500);
+          }, App$1.site.nDelay || (App$1.lastNextFromReal ? 450 : 1500));
       },
       loaded: async function(doc) {
           var parser = new Parser(App$1.site, doc, App$1.curPageUrl);
@@ -4100,6 +4142,10 @@ preferencesShow: function(event){
           await App$1.addNextPage(parser);
       },
       addNextPage: async function(parser) {
+          App$1.lastNextFromReal = !!parser.nextFromReal;   // 供翻页节流自适应
+          // 请求已完成，清除超时兜底守卫
+          App$1._requestActive = false;
+          clearTimeout(App$1._reqTimer);
           if (parser.content) {
               App$1.appendPage(parser);
 
@@ -4124,11 +4170,27 @@ preferencesShow: function(event){
       },
 
       afterLoad: async function() {
-          // 方案A：不再链式自动预载下一章——预加载改由滚动接近底部(400px)时触发一次，
-          // 避免连续快速预载触发站点风控（起点等）；滚动触底时若已预载则直接续读
-          // [修复] 懒加载正文：网站正文滚动到哪渲染到哪（尤其长章节），滚动渲染的新段落未经净化/优化，
+          // 懒加载正文修复：网站正文滚动到哪渲染到哪（尤其长章节），滚动渲染的新段落未经净化/优化，
           // 用 MutationObserver 监听正文容器，新段落渲染时重新应用净化+优化（仅首次挂接一次）
           this._initLazyContentFix();
+
+          // [优化·参考 Super-preloader] 受控链式预读下一页：
+          // 当前章加载完成后，立即（延迟一小段，走翻页节流间隔）后台预读下一页，
+          // 使下一页提前就绪——滚动触底时无缝续读，消除「读了几章后等下一页」的等待。
+          // 滚动接近底部(400px)触发的预读仍保留作兜底（scroll/scrollForce 未动）。
+          // 受控点：串行一次一章、不并发叠加、走节流间隔(真实按钮450ms/拼URL1500ms)、
+          //          iframe 用 no-referrer，尽量降低连续预读触发站点风控的概率；
+          //          若某站(如起点)仍频繁失效，可在该站关闭「预加载下一页」。
+          var self = this;
+          if (Setting.preloadNextPage && !this.isTheEnd && !this._preloadChainPending) {
+              this._preloadChainPending = true;
+              setTimeout(function() {
+                  self._preloadChainPending = false;
+                  if (!self.paused && !self.isTheEnd && !self.isRequesting) {
+                      self.doRequest();
+                  }
+              }, self.site.nDelay || (self.lastNextFromReal ? 450 : 1500));
+          }
       },
 
       // [修复] 懒加载正文优化：滚动/按需渲染的新段落未经过 applyContentSettings，需重新应用净化+优化

@@ -1,16 +1,16 @@
 /* =============================================================
  * background.js — 小说阅读助手 扩展版后台服务（Manifest V3）
  *  1. 跨域请求转发：content script 受 CORS 限制，经此 fetch 任意小说站
- *  2. 打开新标签：GM_openInTab 等价
- *  注：扩展图标点击由 action.default_popup（popup.html/popup.js）独立处理，
- *      有 popup 时 chrome.action.onClicked 不再触发，故此处不处理图标点击。
+ *  2. 打开新标签（经 openInTab 转发）
+ *  注：图标点击打开原生 popup（dist/popup.html，manifest 里 default_popup 声明），
+ *      由浏览器负责定位到图标下方；background 不参与，content 端经 xs_fetch / xs_open_tab 与此通信。
  * ============================================================= */
 
 // ---- 跨域 fetch 转发 ----
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (!request || typeof request.action !== 'string') return;
 
-  if (request.action === 'mnr_fetch') {
+  if (request.action === 'xs_fetch') {
     var url = request.url;
     // 安全：只转发 http/https 请求。拒绝 file://、chrome://、data: 等协议，
     // 防止被劫持的 content script 用它读取本地文件或扩展内部资源（Chromium 官方建议）
@@ -31,11 +31,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     var controller = new AbortController();
     var timer = setTimeout(function () { controller.abort(); }, timeout);
 
-    var opts = {
+    var opts: RequestInit = {
       method: method,
       redirect: 'follow',
       credentials: 'include',
-      signal: controller.signal
+      signal: controller.signal,
+      // [修复] 转发请求头（content 端设置的 Referer 等此前因 opts 未含 headers 从未生效）
+      headers: headers as HeadersInit
     };
     if (method === 'POST' && request.body) {
       opts.body = request.body;
@@ -62,22 +64,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     return true; // 保持异步通道
   }
 
-  if (request.action === 'mnr_open_tab') {
+  if (request.action === 'xs_open_tab') {
     chrome.tabs.create({ url: request.url, active: !!request.active });
-    sendResponse({ ok: true });
-    return false;
-  }
-
-  if (request.action === 'mnr_open_preferences') {
-    // 通知当前标签的 content script 打开设置面板
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      if (tabs && tabs[0] && tabs[0].id != null) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'mnr_open_preferences' }, function () {
-          // 无响应忽略（content script 可能未注入）
-          void chrome.runtime.lastError;
-        });
-      }
-    });
     sendResponse({ ok: true });
     return false;
   }

@@ -27,12 +27,49 @@
 4. 点击 **加载已解压的扩展程序**，选择本项目解压后的文件夹（含 `manifest.json` 的那个根目录）
 5. 安装完成，打开小说网站即可使用
 
+## 🐒 安装（油猴脚本）
+
+不想装扩展的话，也可以用油猴：
+
+1. 浏览器安装 [Tampermonkey](https://www.tampermonkey.net/) / Violentmonkey
+2. 下载仓库根目录的 `小说阅读助手.user.js`
+3. 拖进浏览器或用脚本管理器「导入」，确认安装即可
+
 ## 🛠️ 技术栈
 
 - 浏览器扩展：**Manifest V3**
-- 前端：原生 JavaScript + HTML/CSS
+- 源码：**TypeScript**（`src/*.ts`）
+- 构建：**esbuild**（`build.js`），一次产出扩展产物与油猴脚本
 - 兼容：Chrome 88+ / Edge 等 Chromium 内核浏览器
+
+## 🔧 开发
+
+```bash
+npm install        # 安装依赖
+npm run typecheck  # 类型检查（tsc --noEmit）
+npm run build      # 构建：dist/*.js + 根目录油猴脚本
+npm test           # 单元测试
+```
+
+目录结构：
+
+```
+src/                TypeScript 源码
+  content.ts        内容脚本主逻辑（正文解析、渲染、交互）
+  dom.ts            DOM 操作层（jQuery 兼容）
+  sites.ts          站点规则库
+  adapter.ts        扩展 API ↔ 油猴 API 适配层
+  background.ts     后台 service worker
+  popup.ts/.html    图标弹窗
+  tpl/              内联样式与模板
+dist/               构建产物（扩展加载这个）
+build.js            构建脚本
+test.js             单元测试
+manifest.json      扩展清单
+```
+
+改完代码跑 `npm run build`，然后在 `chrome://extensions` 里点「重新加载」，油猴脚本需重新导入。
 
 ## 📄 许可证
 
-本项目使用 [MIT License](LICENSE)。欢迎自由使用、修改、分发。
+本项目使用 [MIT License](https://github.com/zdl0228/xiaoshuo-reader/blob/main/LICENSE)。欢迎自由使用、修改、分发。

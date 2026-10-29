@@ -1,0 +1,13 @@
+# 依赖
+node_modules/
+
+# 历史备份（本地开发用，不入库）
+bak/
+src/bak/
+
+# 系统文件
+.DS_Store
+
+# 构建中间产物
+*.map
+*.tsbuildinfo

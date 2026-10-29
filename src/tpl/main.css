@@ -1,0 +1,200 @@
+body > a { display:none !important; }
+.hidden {
+    display: none;
+}
+.quiet-mode {
+    display: none;
+}
+body {
+    background: #F3F2EE;
+    color: #1F0909;
+    padding: 0px;
+    margin: 0px;
+    font-family: {uiFont};
+}
+a { color: #065488; }
+a:link { text-decoration: none; }
+
+#xiaoshuo-reader-content {
+    width: auto;
+    max-width: {content_width};
+    font-size: {font_size};
+    font-family: {font_family};
+    /* 行高与字间距属于正文排版，只在这里出：皮肤样式表不再重复声明，
+       否则会盖掉设置面板里用户选的行高 */
+    line-height: {text_line_height};
+    letter-spacing: 0.05em;
+    margin-left:auto;
+    margin-right:auto;
+    padding-bottom: 15px;
+}
+#xiaoshuo-reader-content img{
+    max-width: 100%;
+}
+
+article {
+    margin-top: 55px;
+    word-wrap: break-word;
+}
+
+article p {
+    margin: {paragraph_height} 0;
+}
+
+article h1 {
+    clear: both;
+    line-height: 50px;
+    font-size: {title_font_size};
+    font-weight: normal;
+    margin: 25px -20px;
+    padding: 0 20px 10px;
+    border-bottom: 1px solid rgba(0,0,0,.12);
+    font-weight: normal;
+    text-transform: none;
+}
+
+article li {
+    list-style: none;
+}
+
+#loading {
+    text-align: center;
+    font: 12px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 8px 18px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.78);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+    border: 0.5px solid rgba(0,0,0,.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.06);
+    color: #1D1D1F;
+    line-height: 1.6;
+}
+#loading img {
+    vertical-align: middle;
+}
+#loading a {
+    color: #007AFF;
+}
+
+#alert {
+    position: fixed;
+    /* 层级档位：面板 2147483647 > 通知/提示 2147483646 > 悬浮按钮 2147483645。
+       z-index 超出 int32(2147483647) 会被钳制，同值时靠 DOM 顺序侥幸排序，故显式分档 */
+    z-index: 2147483646;
+    width: auto;
+    max-width: 70%;
+    height: auto;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 9px 18px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.78);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+    border: 0.5px solid rgba(0,0,0,.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.06);
+    color: #1D1D1F;
+    font-size: 13px;
+    line-height: 1.6;
+}
+#alert p {
+    margin: 0;
+}
+
+img.blockImage {clear: both;float: none;display: block;margin-left: auto;margin-right: auto;}
+
+#menu-bar {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    width: 1px;
+    background: transparent;
+    border: none;
+    z-index: 199;
+}
+#menu {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    width: 280px;
+    max-width: 60%;
+    background: var(--panel-glass, rgba(248,248,248,1));
+    
+    
+    border-right: 1px solid rgba(0,0,0,.08);
+    overflow-y: auto;
+    padding: 10px 0;
+}
+#header{
+    color: #1D1D1F;
+    margin: 0 18px 4px;
+    background: transparent;
+    padding: 6px 0;
+    text-transform: none;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: .4px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+}
+#header a {
+    color: #888;
+}
+#chapter-list {
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    list-style: none;
+}
+.chapter {
+    list-style: none;
+}
+.chapter div {
+    color: #1D1D1F;
+    font-size: 13px;
+    padding: 8px 18px;
+    display: block;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.chapter div:hover {
+    background: rgba(0,0,0,.05);
+    color: #1D1D1F;
+}
+.chapter.active div {
+    background: rgba(0,122,255,.12);
+    color: #007AFF;
+    font-weight: 600;
+}
+/* macOS 覆盖式滚动条：轨道透明、无箭头、胶囊 thumb 内缩留白 */
+::-webkit-scrollbar {
+    height: 10px !important;
+    width: 10px !important;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece {
+    background: transparent !important;
+    border: none !important;
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,.26) !important;
+    border: 2px solid transparent !important;
+    background-clip: content-box !important;
+    border-radius: 100px !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0,0,0,.42) !important;
+}
+::-webkit-scrollbar-corner {
+    background: transparent !important;
+}

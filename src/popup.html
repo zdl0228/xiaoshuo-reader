@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>小说阅读助手</title>
+<!--
+  popup 自包含样式：不再引入设置面板的 preferences.css。
+  原因：preferences.css 是给「页面内全屏浮层」用的（含独立 body{} 根规则、16px 圆角卡片、
+  .92 半透明底色、浮层重投影），套进扩展弹窗这个独立文档就会出现「方形窗口套圆角卡片」、
+  「外层白内层绿」等一堆叠层问题。此处只保留弹窗真正需要的部分：
+    · 铺满窗口的皮肤底色（不透明，避免与窗口白底同色）
+    · 无卡片层、无自造圆角（窗口形状由浏览器决定，CSS 改不了）
+    · 皮肤跟随：body 上挂 .dark / .eye 类，由 popup.ts 读 skin_name 决定
+-->
+<style>
+  :root {
+    --bg: #faf9f8;
+    --fg: #1c1c1e;
+    --fg-dim: #86868b;
+    --line: rgba(0, 0, 0, .08);
+    --hover: rgba(0, 0, 0, .05);
+    --press: rgba(0, 0, 0, .09);
+    --accent: #007aff;
+  }
+  /* 深色皮肤：与设置面板 .body.prefs-dark 同色系。
+     选择器同时覆盖 html 与 body（popup.ts 两处都挂类）：变量必须落在 <html> 上，
+     否则 body 只有 186px 宽/内容高度，窗口底部与右侧会露出 :root 的浅色底。 */
+  html.dark, body.dark {
+    --bg: #2c2c2e;
+    --fg: #f2f2f7;
+    --fg-dim: #98989d;
+    --line: rgba(255, 255, 255, .12);
+    --hover: rgba(255, 255, 255, .08);
+    --press: rgba(255, 255, 255, .14);
+    --accent: #0a84ff;
+  }
+  /* 护眼皮肤：与设置面板 prefs-eye 同色系 */
+  html.eye, body.eye {
+    --bg: #eef7ee;
+    --fg: #263238;
+    --fg-dim: #5b6e60;
+    --line: rgba(0, 0, 0, .09);
+    --hover: rgba(0, 0, 0, .05);
+    --press: rgba(0, 0, 0, .09);
+    --accent: #1f7a3d;
+  }
+  /* 深色皮肤下 html 的底色（html 拿不到 --bg 时兜底，保证整窗铺满） */
+  html.dark { background: #2c2c2e; }
+  html.eye { background: #eef7ee; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--bg);   /* 皮肤色铺满整个弹窗窗口，四边不留白 */
+  }
+  body {
+    width: 186px;
+    color: var(--fg);
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+          "Helvetica Neue", "Segoe UI", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    cursor: default;
+  }
+
+  /* 顶部：当前网站域名 */
+  .host {
+    padding: 9px 14px 8px;
+    border-bottom: 1px solid var(--line);
+    font-size: 11.5px;
+    color: var(--fg-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 菜单区：扁平列表，无卡片层，行间只有发丝分隔线 */
+  .menu { padding: 4px 8px 6px; }
+
+  /* 对勾紧跟文字（不再靠右拉开），行内从左起排：文字 → 6px → 对勾 */
+  .row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 8px 6px;
+    border-radius: 6px;
+    transition: background .12s ease;
+  }
+  /* 行间发丝线用伪元素画：直接给 .row 加 border-top 会被 6px 圆角带着弯成一道弧，
+     hover 圆角块与折线并存也很难看。伪元素左右各缩 6px，正好落在圆角内侧。 */
+  .row + .row::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    top: 0;
+    height: 1px;
+    background: var(--line);
+  }
+  .row:hover { background: var(--hover); }
+  .row:active { background: var(--press); }
+  .row.disabled { color: var(--fg-dim); pointer-events: none; }
+
+  .label { white-space: nowrap; }
+
+  /* 当前状态对勾：未选中时占位不可见，避免文字左右跳动 */
+  .check {
+    flex: none;
+    width: 15px;
+    height: 15px;
+    color: var(--accent);
+    visibility: hidden;
+  }
+  .check svg { display: block; width: 15px; height: 15px; }
+  .row.selected .check { visibility: visible; }
+</style>
+</head>
+<body>
+  <div class="host" id="site">…</div>
+  <div class="menu">
+    <div class="row" id="item-enable" role="button">
+      <span class="label">在此网站启用阅读助手</span>
+      <span class="check"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.3 17.6 4.2 12.5l1.5-1.5 3.6 3.6 8.5-8.5 1.5 1.5z" fill="currentColor"/></svg></span>
+    </div>
+    <div class="row" id="item-disable" role="button">
+      <span class="label">在此网站关闭阅读助手</span>
+      <span class="check"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.3 17.6 4.2 12.5l1.5-1.5 3.6 3.6 8.5-8.5 1.5 1.5z" fill="currentColor"/></svg></span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

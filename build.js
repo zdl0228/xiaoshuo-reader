@@ -107,6 +107,19 @@ function readableTemplates(code) {
   );
 }
 
+// [跨平台] 模板统一 LF：Windows 上检出的是 CRLF，esbuild 会把 \r\n 原样编进字符串，
+// 导致 CSS/HTML 内容多出 \r、产物与 macOS 构建字节不一致，且 readableTemplates 的多行
+// 还原会因含 \r 转义而放弃。这里在读取阶段就归一化，产物因此与平台无关。
+const lfTemplates = [{
+  name: 'lf-templates',
+  setup(build) {
+    build.onLoad({ filter: /\.(css|html)$/ }, async (args) => {
+      const text = await fs.promises.readFile(args.path, 'utf8');
+      return { contents: text.replace(/\r\n/g, '\n'), loader: 'text' };
+    });
+  },
+}];
+
 (async () => {
   for (const name of FILES) {
     const format = FORMATS[name] || 'iife';
@@ -121,12 +134,18 @@ function readableTemplates(code) {
       legalComments: 'none',
       charset: 'utf8',                 // 中文字符串原样输出（默认 ascii 会转成 \u4E2D\u6587 转义）
       loader: { '.css': 'text', '.html': 'text' }, // 模板文件内联为字符串
+      plugins: lfTemplates,            // 模板换行符归一化（跨平台产物一致）
     });
     console.log(`  ✔ dist/${name}.js  [${format}]`);
   }
 
   // ---- 复制 popup.html → dist/popup.html（扩展专用面板，不进 user.js） ----
-  fs.copyFileSync(path.join(__dirname, 'src/popup.html'), path.join(__dirname, 'dist/popup.html'));
+  // 同样归一化换行符，保证 macOS / Windows 构建产物字节一致
+  fs.writeFileSync(
+    path.join(__dirname, 'dist/popup.html'),
+    fs.readFileSync(path.join(__dirname, 'src/popup.html'), 'utf8').replace(/\r\n/g, '\n'),
+    'utf8'
+  );
   console.log('  ✔ dist/popup.html');
 
   // ---- 油猴同步输出：header + 单层 IIFE( adapter 兼容层 + content 主逻辑 ) ----

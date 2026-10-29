@@ -17,8 +17,9 @@ function read(p) { return fs.readFileSync(path.join(__dirname, p), 'utf8'); }
 
 console.log('【1】构建产物完整性');
 ['dist/background.js', 'dist/content.js'].forEach((f) => {
-  const exists = fs.existsSync(f);
-  ok(exists && fs.statSync(f).size > 0, `${f} 存在且非空`);
+  const p = path.join(__dirname, f);
+  const exists = fs.existsSync(p);
+  ok(exists && fs.statSync(p).size > 0, `${f} 存在且非空`);
 });
 
 console.log('【2】content↔background 通信 action 一致');

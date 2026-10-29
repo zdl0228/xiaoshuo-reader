@@ -370,118 +370,118 @@ img.blockImage {clear: both;float: none;display: block;margin-left: auto;margin-
 }
 `;
 
-  var prefsHtml = `<form id='preferences' name='preferences'>\r
-    <div class='prefs-header prefs-dragbar'>\r
-        <div class='prefs-head-title'>阅读设置</div>\r
-    </div>\r
-    <div class='prefs-body'>\r
-\r
-<div class='prefs-sec'>外观设置</div>\r
-<div class='prefs-group'>\r
-        <div class='prefs-row prefs-label-row'>\r
-            <span class='prefs-label'>皮肤</span>\r
-        <div class='skin-row'>\r
-            <label class='skin-item' data-skin='浅色' title='暖纸白 · 适合白天正常光线长时间阅读'><span class='skin-swatch is-light'>Aa</span>浅色</label>\r
-            <label class='skin-item' data-skin='深色' title='深灰底 · 适合低光/夜间，关灯不刺眼'><span class='skin-swatch is-dark'>Aa</span>深色</label>\r
-            <label class='skin-item' data-skin='护眼' title='豆沙绿 · 低对比柔和，长时间护眼'><span class='skin-swatch is-eye'>Aa</span>护眼</label>\r
-            <label class='skin-item' data-skin='自动' title='跟随系统外观，在浅色/深色间自动切换'><span class='skin-swatch is-auto'><i>A</i><i>a</i></span>自动</label>\r
-        </div>\r
-        </div>\r
-        <select id='skin' style='display:none'></select>\r
-        <div class='prefs-row prefs-label-row'>\r
-            <span class='prefs-label' title='正文字体，选择后即时预览'>字体</span>\r
-            <select id='font-family' class='prefs-select' title='正文字体，选择后即时预览'>\r
-                <option value='PingFang SC,苹方-简,宋体,楷体' data-def='mac'>苹方（macOS 默认）</option>\r
-                <option value='微软雅黑,宋体,黑体,楷体' data-def='win'>微软雅黑（Windows 默认）</option>\r
-                <option value='宋体,SimSun,"Songti SC",宋体-简'>宋体</option>\r
-                <option value='楷体,楷体_GB2312,"Kaiti SC",楷体-简'>楷体</option>\r
-                <option value='黑体,SimHei,"Heiti SC",黑体-简'>黑体</option>\r
-            </select>\r
-        </div>\r
-        <div class='prefs-grid'>\r
-        <div class='prefs-slider'>\r
-            <div class='slider-head'><span title='正文字号大小（像素，范围12-40）'>字号</span><span class='slider-val' id='val-font-size'></span></div>\r
-            <input type='range' id='font-size' min='12' max='40' step='1'/>\r
-        </div>\r
-        <div class='prefs-slider'>\r
-            <div class='slider-head'><span title='行与行之间的间距（倍数，越大行越疏）'>行高</span><span class='slider-val' id='val-text_line_height'></span></div>\r
-            <input type='range' id='text_line_height' min='1.2' max='2.6' step='0.1'/>\r
-        </div>\r
-        <div class='prefs-slider'>\r
-            <div class='slider-head'><span title='段落之间的间距（倍数，越大段落间隔越大）'>段距</span><span class='slider-val' id='val-paragraph_height'></span></div>\r
-            <input type='range' id='paragraph_height' min='0' max='2' step='0.1'/>\r
-        </div>\r
-        <div class='prefs-slider'>\r
-            <div class='slider-head'><span title='正文内容的最大宽度（像素，范围600-1400）'>正文宽</span><span class='slider-val' id='val-content_width'></span></div>\r
-            <input type='range' id='content_width' min='600' max='1400' step='10'/>\r
-        </div>\r
-        </div>\r
-</div>\r
-\r
-<div class='prefs-sec'>阅读行为</div>\r
-<div class='prefs-group'>\r
-        <div class='prefs-row prefs-switch-row'>\r
-            <label class='prefs-switch' title='找不到下一页链接时，按网址页码规律自动递增'><input type='checkbox' id='smart-next-page'/>智能自动翻页<span class='track'><span class='thumb'></span></span></label>\r
-            <label class='prefs-switch' title='滚动近底部自动预读下一章，翻页更流畅'><input type='checkbox' id='preload-next-page'/>预加载下一页<span class='track'><span class='thumb'></span></span></label>\r
-        </div>\r
-        <div class='prefs-row prefs-switch-row'>\r
-            <label class='prefs-switch' title='隐藏左侧章节列表；需要时按快捷键（c）可临时呼出'><input type='checkbox' id='hide-menu-list'/>隐藏章节列表<span class='track'><span class='thumb'></span></span></label>\r
-            <label class='prefs-switch' title='排版优化：合并引号、清洗标点、全半角、自动分段，会调整排版，需时再开'><input type='checkbox' id='enable-content-optimize'/>正文内容优化<span class='track'><span class='thumb'></span></span></label>\r
-        </div>\r
-        <div class='prefs-row prefs-slider-row'>\r
-            <div class='slider-head'><span title='自动滚动阅读时的滚动速度（1-100像素/秒），开启自动滚动（双击页面）后生效'>滚动速度</span><span class='slider-val' id='val-auto-scroll-speed'></span></div>\r
-            <input type='range' id='auto-scroll-speed' min='1' max='100' step='1' title='自动滚动阅读时的滚动速度（1-100像素/秒）'/>\r
-        </div>\r
-</div>\r
-\r
-<div class='prefs-sec'>站点设置</div>\r
-<div class='prefs-group'>\r
-        <div class='prefs-row'>\r
-            <div class='siteinfo-box'>\r
-                <div class='siteinfo-bar'>\r
-                    <span class='siteinfo-tag'>JSON</span>\r
-                    <span class='siteinfo-count' id='siteinfo-count'>0 条规则</span>\r
-                    <input type='button' id='format-siteinfo' value='整理排版' class='btn-plain btn-mini' title='把规则排成缩进对齐格式，每条站点规则之间空一行，便于逐条查看'/>\r
-                    <input type='button' id='copy-siteinfo' value='复制' class='btn-plain btn-mini' title='复制全部规则文本'/>\r
-                </div>\r
-                <textarea id='custom_siteinfo' class='prefs_textarea' spellcheck='false' placeholder='暂无站点规则'></textarea>\r
-            </div>\r
-        </div>\r
-</div>\r
-\r
-<div class='prefs-sec'>热键配置</div>\r
-<div class='prefs-group'>\r
-        <div class='prefs-row prefs-key-hint'>前两行可点击按键修改，其余基础导航键默认折叠，点击查看</div>\r
-        <table class='prefs-key-table'>\r
-            <tr><td>切换章节列表</td><td><button type='button' class='key-btn' id='setHideMenuListKey' title='点击后按键盘新按键设置'>c</button></td></tr>\r
-            <tr><td>打开设置</td><td><button type='button' class='key-btn' id='openPreferencesKey' title='点击后按键盘新按键设置'>o</button></td></tr>\r
-        </table>\r
-        <details class='prefs-key-more'>\r
-            <summary>查看其他快捷键</summary>\r
-            <table class='prefs-key-table'>\r
-                <tr><td>打开小说主页</td><td>Enter</td></tr>\r
-                <tr><td>上一章 / 上一段</td><td>← Left</td></tr>\r
-                <tr><td>下一章 / 下一段</td><td>→ Right</td></tr>\r
-                <tr><td>关闭设置面板</td><td>Esc</td></tr>\r
-                <tr><td>向上滚动一屏</td><td>, 逗号</td></tr>\r
-                <tr><td>向下滚动一屏</td><td>. 句点</td></tr>\r
-                <tr><td>上一章（快捷）</td><td>[</td></tr>\r
-                <tr><td>下一章（快捷）</td><td>]</td></tr>\r
-                <tr><td>启动 / 暂停自动滚动（鼠标，不可改）</td><td>双击页面</td></tr>\r
-            </table>\r
-        </details>\r
-</div>\r
-\r
-<div class='prefs-sec'>数据管理</div>\r
-<div class='prefs-group'>\r
-        <div class='prefs-row prefs-config-row'>\r
-            <input type='button' id='reset-config' value='恢复默认' class='btn-plain' title='将全部设置恢复为默认值，保留已启用站点，适合设置被调乱时一键复原'/>\r
-            <input type='button' id='export-config' value='导出数据' class='btn-plain' title='导出所有已加载设置与站点规则为JSON备份'/>\r
-            <input type='button' id='import-config' value='导入数据' class='btn-plain' title='读取备份文件，自动识别并覆盖对应数据'/>\r
-        </div>\r
-</div>\r
-\r
-    </div>\r
+  var prefsHtml = `<form id='preferences' name='preferences'>
+    <div class='prefs-header prefs-dragbar'>
+        <div class='prefs-head-title'>阅读设置</div>
+    </div>
+    <div class='prefs-body'>
+
+<div class='prefs-sec'>外观设置</div>
+<div class='prefs-group'>
+        <div class='prefs-row prefs-label-row'>
+            <span class='prefs-label'>皮肤</span>
+        <div class='skin-row'>
+            <label class='skin-item' data-skin='浅色' title='暖纸白 · 适合白天正常光线长时间阅读'><span class='skin-swatch is-light'>Aa</span>浅色</label>
+            <label class='skin-item' data-skin='深色' title='深灰底 · 适合低光/夜间，关灯不刺眼'><span class='skin-swatch is-dark'>Aa</span>深色</label>
+            <label class='skin-item' data-skin='护眼' title='豆沙绿 · 低对比柔和，长时间护眼'><span class='skin-swatch is-eye'>Aa</span>护眼</label>
+            <label class='skin-item' data-skin='自动' title='跟随系统外观，在浅色/深色间自动切换'><span class='skin-swatch is-auto'><i>A</i><i>a</i></span>自动</label>
+        </div>
+        </div>
+        <select id='skin' style='display:none'></select>
+        <div class='prefs-row prefs-label-row'>
+            <span class='prefs-label' title='正文字体，选择后即时预览'>字体</span>
+            <select id='font-family' class='prefs-select' title='正文字体，选择后即时预览'>
+                <option value='PingFang SC,苹方-简,宋体,楷体' data-def='mac'>苹方（macOS 默认）</option>
+                <option value='微软雅黑,宋体,黑体,楷体' data-def='win'>微软雅黑（Windows 默认）</option>
+                <option value='宋体,SimSun,"Songti SC",宋体-简'>宋体</option>
+                <option value='楷体,楷体_GB2312,"Kaiti SC",楷体-简'>楷体</option>
+                <option value='黑体,SimHei,"Heiti SC",黑体-简'>黑体</option>
+            </select>
+        </div>
+        <div class='prefs-grid'>
+        <div class='prefs-slider'>
+            <div class='slider-head'><span title='正文字号大小（像素，范围12-40）'>字号</span><span class='slider-val' id='val-font-size'></span></div>
+            <input type='range' id='font-size' min='12' max='40' step='1'/>
+        </div>
+        <div class='prefs-slider'>
+            <div class='slider-head'><span title='行与行之间的间距（倍数，越大行越疏）'>行高</span><span class='slider-val' id='val-text_line_height'></span></div>
+            <input type='range' id='text_line_height' min='1.2' max='2.6' step='0.1'/>
+        </div>
+        <div class='prefs-slider'>
+            <div class='slider-head'><span title='段落之间的间距（倍数，越大段落间隔越大）'>段距</span><span class='slider-val' id='val-paragraph_height'></span></div>
+            <input type='range' id='paragraph_height' min='0' max='2' step='0.1'/>
+        </div>
+        <div class='prefs-slider'>
+            <div class='slider-head'><span title='正文内容的最大宽度（像素，范围600-1400）'>正文宽</span><span class='slider-val' id='val-content_width'></span></div>
+            <input type='range' id='content_width' min='600' max='1400' step='10'/>
+        </div>
+        </div>
+</div>
+
+<div class='prefs-sec'>阅读行为</div>
+<div class='prefs-group'>
+        <div class='prefs-row prefs-switch-row'>
+            <label class='prefs-switch' title='找不到下一页链接时，按网址页码规律自动递增'><input type='checkbox' id='smart-next-page'/>智能自动翻页<span class='track'><span class='thumb'></span></span></label>
+            <label class='prefs-switch' title='滚动近底部自动预读下一章，翻页更流畅'><input type='checkbox' id='preload-next-page'/>预加载下一页<span class='track'><span class='thumb'></span></span></label>
+        </div>
+        <div class='prefs-row prefs-switch-row'>
+            <label class='prefs-switch' title='隐藏左侧章节列表；需要时按快捷键（c）可临时呼出'><input type='checkbox' id='hide-menu-list'/>隐藏章节列表<span class='track'><span class='thumb'></span></span></label>
+            <label class='prefs-switch' title='排版优化：合并引号、清洗标点、全半角、自动分段，会调整排版，需时再开'><input type='checkbox' id='enable-content-optimize'/>正文内容优化<span class='track'><span class='thumb'></span></span></label>
+        </div>
+        <div class='prefs-row prefs-slider-row'>
+            <div class='slider-head'><span title='自动滚动阅读时的滚动速度（1-100像素/秒），开启自动滚动（双击页面）后生效'>滚动速度</span><span class='slider-val' id='val-auto-scroll-speed'></span></div>
+            <input type='range' id='auto-scroll-speed' min='1' max='100' step='1' title='自动滚动阅读时的滚动速度（1-100像素/秒）'/>
+        </div>
+</div>
+
+<div class='prefs-sec'>站点设置</div>
+<div class='prefs-group'>
+        <div class='prefs-row'>
+            <div class='siteinfo-box'>
+                <div class='siteinfo-bar'>
+                    <span class='siteinfo-tag'>JSON</span>
+                    <span class='siteinfo-count' id='siteinfo-count'>0 条规则</span>
+                    <input type='button' id='format-siteinfo' value='整理排版' class='btn-plain btn-mini' title='把规则排成缩进对齐格式，每条站点规则之间空一行，便于逐条查看'/>
+                    <input type='button' id='copy-siteinfo' value='复制' class='btn-plain btn-mini' title='复制全部规则文本'/>
+                </div>
+                <textarea id='custom_siteinfo' class='prefs_textarea' spellcheck='false' placeholder='暂无站点规则'></textarea>
+            </div>
+        </div>
+</div>
+
+<div class='prefs-sec'>热键配置</div>
+<div class='prefs-group'>
+        <div class='prefs-row prefs-key-hint'>前两行可点击按键修改，其余基础导航键默认折叠，点击查看</div>
+        <table class='prefs-key-table'>
+            <tr><td>切换章节列表</td><td><button type='button' class='key-btn' id='setHideMenuListKey' title='点击后按键盘新按键设置'>c</button></td></tr>
+            <tr><td>打开设置</td><td><button type='button' class='key-btn' id='openPreferencesKey' title='点击后按键盘新按键设置'>o</button></td></tr>
+        </table>
+        <details class='prefs-key-more'>
+            <summary>查看其他快捷键</summary>
+            <table class='prefs-key-table'>
+                <tr><td>打开小说主页</td><td>Enter</td></tr>
+                <tr><td>上一章 / 上一段</td><td>← Left</td></tr>
+                <tr><td>下一章 / 下一段</td><td>→ Right</td></tr>
+                <tr><td>关闭设置面板</td><td>Esc</td></tr>
+                <tr><td>向上滚动一屏</td><td>, 逗号</td></tr>
+                <tr><td>向下滚动一屏</td><td>. 句点</td></tr>
+                <tr><td>上一章（快捷）</td><td>[</td></tr>
+                <tr><td>下一章（快捷）</td><td>]</td></tr>
+                <tr><td>启动 / 暂停自动滚动（鼠标，不可改）</td><td>双击页面</td></tr>
+            </table>
+        </details>
+</div>
+
+<div class='prefs-sec'>数据管理</div>
+<div class='prefs-group'>
+        <div class='prefs-row prefs-config-row'>
+            <input type='button' id='reset-config' value='恢复默认' class='btn-plain' title='将全部设置恢复为默认值，保留已启用站点，适合设置被调乱时一键复原'/>
+            <input type='button' id='export-config' value='导出数据' class='btn-plain' title='导出所有已加载设置与站点规则为JSON备份'/>
+            <input type='button' id='import-config' value='导入数据' class='btn-plain' title='读取备份文件，自动识别并覆盖对应数据'/>
+        </div>
+</div>
+
+    </div>
     </form>`;
 
   var prefsCss = `.body {
@@ -5274,7 +5274,7 @@ input[type=range]::-webkit-slider-thumb {
           }
           return;
         }
-        addStyle('            .reader-enter-wrap {                position: fixed;                right: 20px;                bottom: 20px;                /* 层级档位：面板 2147483647 > 通知/提示 2147483646 > 悬浮按钮 2147483645 */                z-index: 2147483645;            }            .reader-enter-main {                width: 54px;                height: 54px;                border-radius: 50%;                display: flex;                align-items: center;                justify-content: center;                background: var(--reader-btn-bg, rgba(255,255,255,0.62));                /* 玻璃配方与 #alert/#loading/首页提示条同一套：半透明底 + 磨砂 + 细描边 + 双层柔影 */                -webkit-backdrop-filter: blur(20px) saturate(1.8);                backdrop-filter: blur(20px) saturate(1.8);                border: 1px solid var(--reader-btn-border, rgba(0,0,0,0.08));                box-shadow: 0 6px 20px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);                color: var(--reader-btn-text, rgba(60,60,67,0.92));                font-size: 11px;                font-weight: 500;                cursor: pointer;                transition: transform .15s ease, background .15s ease;                box-sizing: border-box;                user-select: none;                font-family: -apple-system, "SF Pro Text", "PingFang SC", sans-serif;                text-align: center;                line-height: 1.2;            }            .reader-enter-main:hover {                transform: scale(1.05);                background: var(--reader-btn-bg-hover, rgba(255,255,255,0.78));            }            .reader-enter-set {                position: absolute;                top: -5px;                right: -5px;                width: 22px;                height: 22px;                border-radius: 50%;                display: flex;                align-items: center;                justify-content: center;                background: var(--reader-btn-bg, rgba(255,255,255,0.62));                -webkit-backdrop-filter: blur(20px) saturate(1.8);                backdrop-filter: blur(20px) saturate(1.8);                border: 1px solid var(--reader-btn-border, rgba(0,0,0,0.08));                box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);                cursor: pointer;                transition: transform .15s ease, background .15s ease;                box-sizing: border-box;                user-select: none;            }            .reader-enter-set:hover {                transform: scale(1.1);                background: var(--reader-btn-bg-hover, rgba(255,255,255,0.78));            }            .reader-enter-set svg {                width: 12px;                height: 12px;                fill: var(--reader-btn-text, rgba(60,60,67,0.92));            }        ');
+        addStyle('            .reader-enter-wrap {                position: fixed;                right: 20px;                bottom: 20px;                /* 层级档位：面板 2147483647 > 通知/提示 2147483646 > 悬浮按钮 2147483645 */                z-index: 2147483645;            }            .reader-enter-main {                width: 54px;                height: 54px;                border-radius: 50%;                display: flex;                align-items: center;                justify-content: center;                background: var(--reader-btn-bg, rgba(255,255,255,0.62));                /* 玻璃配方与 #alert/#loading/首页提示条同一套：半透明底 + 磨砂 + 细描边 + 双层柔影 */                -webkit-backdrop-filter: blur(20px) saturate(1.8);                backdrop-filter: blur(20px) saturate(1.8);                border: 1px solid var(--reader-btn-border, rgba(0,0,0,0.08));                box-shadow: 0 6px 20px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);                color: var(--reader-btn-text, rgba(60,60,67,0.92));                font-size: 11px;                font-weight: 500;                cursor: pointer;                transition: transform .15s ease, background .15s ease;                box-sizing: border-box;                user-select: none;                font-family: -apple-system, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "微软雅黑", sans-serif;                text-align: center;                line-height: 1.2;            }            .reader-enter-main:hover {                transform: scale(1.05);                background: var(--reader-btn-bg-hover, rgba(255,255,255,0.78));            }            .reader-enter-set {                position: absolute;                top: -5px;                right: -5px;                width: 22px;                height: 22px;                border-radius: 50%;                display: flex;                align-items: center;                justify-content: center;                background: var(--reader-btn-bg, rgba(255,255,255,0.62));                -webkit-backdrop-filter: blur(20px) saturate(1.8);                backdrop-filter: blur(20px) saturate(1.8);                border: 1px solid var(--reader-btn-border, rgba(0,0,0,0.08));                box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);                cursor: pointer;                transition: transform .15s ease, background .15s ease;                box-sizing: border-box;                user-select: none;            }            .reader-enter-set:hover {                transform: scale(1.1);                background: var(--reader-btn-bg-hover, rgba(255,255,255,0.78));            }            .reader-enter-set svg {                width: 12px;                height: 12px;                fill: var(--reader-btn-text, rgba(60,60,67,0.92));            }        ');
         function updateBtn() {
           let $wrap2 = XS(".reader-enter-wrap");
           if (!$wrap2.length) return;
@@ -7001,6 +7001,8 @@ input[type=range]::-webkit-slider-thumb {
         XS(document).off("keydown.xsKeys").on("keydown.xsKeys", function(e) {
           let t = e.target;
           if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+          if (e.ctrlKey || e.metaKey || e.altKey) return;
+          if (e.isComposing || e.keyCode === 229) return;
           let k = String(e.key || "");
           let hk = String(Setting.hide_menu_list_key || "").trim().toLowerCase();
           let ok = String(Setting.open_preferences_key || "").trim().toLowerCase();
@@ -7611,6 +7613,8 @@ input[type=range]::-webkit-slider-thumb {
         document.addEventListener("keydown", function(e) {
           let t = e.target;
           if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+          if (e.ctrlKey || e.metaKey || e.altKey) return;
+          if (e.isComposing || e.keyCode === 229) return;
           let k = String(e.key || "").toLowerCase();
           if (k !== getPrefsKey()) return;
           let _inReader = !!(document.body && document.body.getAttribute && document.body.getAttribute("name") === "小说阅读助手");

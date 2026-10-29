@@ -2384,7 +2384,7 @@ refreshSkinStyle: function(skin_name: any, isFirst?: any){
                 transition: transform .15s ease, background .15s ease;\
                 box-sizing: border-box;\
                 user-select: none;\
-                font-family: -apple-system, "SF Pro Text", "PingFang SC", sans-serif;\
+                font-family: -apple-system, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "微软雅黑", sans-serif;\
                 text-align: center;\
                 line-height: 1.2;\
             }\
@@ -4381,6 +4381,14 @@ preferencesShow: function(event?: any){
           XS(document).off('keydown.xsKeys').on('keydown.xsKeys', function(this: any, e: any) {
               let t = e.target;
               if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+              // [跨平台] 带修饰键的组合一律放行，交给浏览器/系统：
+              //   Windows 上 Ctrl+O(打开文件) / Ctrl+S(保存) / Ctrl+P(打印)，
+              //   Ctrl+[ / Ctrl+](后退/前进)、Alt+← / Alt+→(后退/前进) 都是系统级快捷键，
+              //   拦下来会变成"按了毫无反应"。macOS 的 Cmd 组合同理。
+              if (e.ctrlKey || e.metaKey || e.altKey) return;
+              // [跨平台] 中文输入法组合中（Windows 上更常见）不响应裸键，
+              //   否则打拼音时会顺手把设置面板弹出来。keyCode 229 是老内核的组合同义值。
+              if (e.isComposing || e.keyCode === 229) return;
               let k = String(e.key || '');
 
               // 两个可改键（切换章节列表 / 打开设置）
@@ -5063,6 +5071,10 @@ preferencesShow: function(event?: any){
       document.addEventListener('keydown', function (e) {
         let t: any = e.target;
         if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+        // [跨平台] 与 registerKeys 同一套护栏：修饰键组合 + 输入法组合态一律放行。
+        // 这个监听在捕获阶段且会 stopImmediatePropagation，不挡的话 Ctrl+O 连浏览器都打不开文件。
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        if (e.isComposing || e.keyCode === 229) return;
         let k = String(e.key || '').toLowerCase();
         if (k !== getPrefsKey()) return;
         // 未进入阅读模式时不响应设置快捷键（不进阅读模式即不影响当前标签页）

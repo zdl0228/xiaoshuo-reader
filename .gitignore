@@ -11,3 +11,7 @@ src/bak/
 # 构建中间产物
 *.map
 *.tsbuildinfo
+
+# 本地开发文档（仅本地留存，不发布）
+开发手册.md
+*.local.md
